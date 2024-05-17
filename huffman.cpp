@@ -181,8 +181,10 @@ void urutkanFrekuensi(Node** head) {
 // Fungsi untuk membuat pohon Huffman
 Node* buatHuffmanTree(Node* head) {
     while (head != NULL && head->next != NULL) {
+        // traversal linked list
         Node* left = head;
         Node* right = head->next;
+
         Node* newNode = buatNode('\0', left->frekuensi + right->frekuensi);
         newNode->left = left;
         newNode->right = right;
