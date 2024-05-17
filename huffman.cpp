@@ -1,34 +1,15 @@
+#include "huffman.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define TABLE_WIDTH 13
-
-// Struktur untuk menyimpan karakter dan frekuensinya dalam linked list dan binary tree
-typedef struct Node {
-    char karakter;
-    int frekuensi;
-    struct Node* next;
-    struct Node* left;
-    struct Node* right;
-} Node;
-
 // Fungsi untuk membuat node baru
-Node* buatNode(char karakter) {
-    Node* node = (Node*)malloc(sizeof(Node));
-    node->karakter = karakter;
-    node->frekuensi = 1;
-    node->next = NULL;
-    node->left = NULL;
-    node->right = NULL;
-    return node;
-}
-
-// Fungsi untuk membuat node baru dengan frekuensi tertentu
-Node* buatNodeDenganFrekuensi(char karakter, int frekuensi) {
+Node* buatNode(char karakter, int frekuensi) {
     Node* node = (Node*)malloc(sizeof(Node));
     node->karakter = karakter;
     node->frekuensi = frekuensi;
+    node->code = NULL;
     node->next = NULL;
     node->left = NULL;
     node->right = NULL;
@@ -51,7 +32,7 @@ void tambahAtauPerbaruiNode(Node** head, char karakter) {
         current->frekuensi++;
     } else {
         // Jika karakter tidak ditemukan, buat node baru
-        Node* newNode = buatNode(karakter);
+        Node* newNode = buatNode(karakter, 1);
         if (prev == NULL) {
             // Tambah node baru sebagai head jika list kosong
             *head = newNode;
@@ -166,21 +147,27 @@ void cetakFrekuensi(const Node* head) {
     printf("%c\n", 188);
 }
 
-// Fungsi untuk mengurutkan linked list berdasarkan frekuensi secara menaik
+// Fungsi untuk mengurutkan linked list berdasarkan frekuensi secara menaik dan karakter
 void urutkanFrekuensi(Node** head) {
     if (*head == NULL) return;
 
     Node* sorted = NULL;
 
     Node* current = *head;
+    // selama node bukan null
     while (current != NULL) {
+        // ambil node selanjutnya
         Node* next = current->next;
-        if (sorted == NULL || sorted->frekuensi >= current->frekuensi) {
+
+        // jika sorted null || frekuensi sorted lebih besar dari frekuensi current || frekuensi dan karakter sama
+        if (sorted == NULL || sorted->frekuensi > current->frekuensi || (sorted->frekuensi == current->frekuensi && sorted->karakter > current->karakter)) {
             current->next = sorted;
             sorted = current;
         } else {
             Node* temp = sorted;
-            while (temp->next != NULL && temp->next->frekuensi < current->frekuensi) {
+
+            // jika temp next bukan null && (frekuensi temp next lebih kecil dari frekuensi current || frekuensi sama dan karakter temp next lebih kecil dari karakter current
+            while (temp->next != NULL && (temp->next->frekuensi < current->frekuensi || (temp->next->frekuensi == current->frekuensi && temp->next->karakter < current->karakter))) {
                 temp = temp->next;
             }
             current->next = temp->next;
@@ -191,34 +178,20 @@ void urutkanFrekuensi(Node** head) {
     *head = sorted;
 }
 
-// Fungsi untuk menggabungkan dua node menjadi node baru
-Node* gabungNode(Node* node1, Node* node2) {
-    Node* newNode = buatNodeDenganFrekuensi('\0', node1->frekuensi + node2->frekuensi);
-    newNode->left = node1;
-    newNode->right = node2;
-    return newNode;
-}
-
-// Fungsi untuk membuat pohon Huffman dari linked list
+// Fungsi untuk membuat pohon Huffman
 Node* buatHuffmanTree(Node* head) {
-    while (head && head->next) {
-        Node* node1 = head;
-        Node* node2 = head->next;
-        head = node2->next;
-        Node* newNode = gabungNode(node1, node2);
+    while (head != NULL && head->next != NULL) {
+        Node* left = head;
+        Node* right = head->next;
+        Node* newNode = buatNode('\0', left->frekuensi + right->frekuensi);
+        newNode->left = left;
+        newNode->right = right;
 
-        // Tambahkan newNode ke dalam linked list yang terurut berdasarkan frekuensi
-        if (!head || newNode->frekuensi <= head->frekuensi) {
-            newNode->next = head;
-            head = newNode;
-        } else {
-            Node* current = head;
-            while (current->next && current->next->frekuensi < newNode->frekuensi) {
-                current = current->next;
-            }
-            newNode->next = current->next;
-            current->next = newNode;
-        }
+        head = right->next;
+        newNode->next = head;
+        head = newNode;
+
+        urutkanFrekuensi(&head);
     }
     return head;
 }
@@ -237,6 +210,70 @@ void cetakHuffmanTree(Node* root, int depth) {
         cetakHuffmanTree(root->left, depth + 1);
         cetakHuffmanTree(root->right, depth + 1);
     }
+}
+
+// Fungsi untuk mendapatkan kode Huffman untuk setiap karakter
+void dapatkanKodeHuffman(Node* root, char* code, int depth) {
+    if (root == NULL) return;
+
+    if (root->left == NULL && root->right == NULL) {
+        root->code = (char*)malloc((depth + 1) * sizeof(char));
+        strncpy(root->code, code, depth);
+        root->code[depth] = '\0';
+        return;
+    }
+
+    code[depth] = '0';
+    dapatkanKodeHuffman(root->left, code, depth + 1);
+
+    code[depth] = '1';
+    dapatkanKodeHuffman(root->right, code, depth + 1);
+}
+
+// Fungsi untuk mencetak kode Huffman dari setiap karakter
+void cetakKodeHuffman(const Node* root) {
+    if (root == NULL) return;
+
+    if (root->left == NULL && root->right == NULL) {
+        printf("Karakter: '%c', Kode: %s\n", root->karakter, root->code);
+    }
+
+    cetakKodeHuffman(root->left);
+    cetakKodeHuffman(root->right);
+}
+
+// Fungsi untuk mencari kode Huffman dari karakter tertentu
+const char* cariKodeHuffman(const Node* root, char karakter) {
+    if (root == NULL) return NULL;
+
+    if (root->left == NULL && root->right == NULL) {
+        if (root->karakter == karakter) {
+            return root->code;
+        } else {
+            return NULL;
+        }
+    }
+
+    const char* code = cariKodeHuffman(root->left, karakter);
+    if (code == NULL) {
+        code = cariKodeHuffman(root->right, karakter);
+    }
+    return code;
+}
+
+// Fungsi untuk mengubah string menjadi kode Huffman
+void ubahStringMenjadiHuffman(const char* str, const Node* huffmanTree) {
+    int panjang = strlen(str);
+    printf("String dalam kode Huffman: ");
+    for (int i = 0; i < panjang; i++) {
+        const char* code = cariKodeHuffman(huffmanTree, str[i]);
+        if (code != NULL) {
+            printf("%s", code);
+        } else {
+            printf("?");
+        }
+    }
+    printf("\n");
 }
 
 // Fungsi untuk memeriksa apakah node adalah daun
@@ -265,63 +302,4 @@ void generateDotFile(struct Node* root, FILE* file) {
             generateDotFile(root->right, file);
         }
     }
-}
-
-// Fungsi utama
-int main() {
-    system("cls");  // Uncomment if running on Windows
-
-    char str[100];
-    Node* head = NULL;
-
-    printf("Masukkan sebuah string: ");
-    fgets(str, sizeof(str), stdin);
-
-    // Menghilangkan karakter newline jika ada
-    str[strcspn(str, "\n")] = 0;
-
-    cetakJudul("Tahap 1", 60);
-
-    // Menghitung frekuensi karakter
-    hitungFrekuensiKarakter(str, &head);
-
-    printf("Hitung Frekuensi\n");
-    cetakFrekuensi(head);
-    printf("\n");
-
-    // Mengurutkan frekuensi secara menaik
-    urutkanFrekuensi(&head);
-
-    printf("Urutkan Berdasarkan Frekuensi (Ascending)\n");
-    cetakFrekuensi(head);
-    printf("\n");
-
-    // Buat Huffman Tree dari linked list yang terurut
-    Node* huffmanTree = buatHuffmanTree(head);
-
-    printf("Pohon Huffman\n");
-    cetakHuffmanTree(huffmanTree, 0);
-
-    // Buka file untuk menulis output DOT
-    FILE* file = fopen("huffman_tree.dot", "w");
-    fprintf(file, "digraph G {\n");
-
-    // Menulis edge dari pohon Huffman
-    generateDotFile(huffmanTree, file);
-
-    fprintf(file, "}\n");
-    fclose(file);
-
-    printf("DOT file generated: huffman_tree.dot\n");
-    printf("Run 'dot -Tpng huffman_tree.dot -o huffman_tree.png' to generate the PNG image.\n");
-
-    // Free memory
-    // Node* current = huffmanTree;
-    // while (current != NULL) {
-    //     Node* next = current->next;
-    //     free(current);
-    //     current = next;
-    // }
-
-    return 0;
 }
