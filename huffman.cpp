@@ -308,7 +308,7 @@ void generateDotFile(struct Node* root, FILE* file) {
 }
 
 // SAVE LOAD
-// Function to write a node to a binary file
+// Fungsi untuk menyimpan node ke dalam file binary
 void writeNode(FILE* file, Node* node) {
     if (node == NULL) return;
 
@@ -316,7 +316,7 @@ void writeNode(FILE* file, Node* node) {
     fwrite(&node->frekuensi, sizeof(int), 1, file);
     fwrite(&node->code_length, sizeof(int), 1, file);
 
-    // Write if the node has children
+    // Tulis jika node punya anak
     uint8_t hasLeft = (node->left != NULL);
     uint8_t hasRight = (node->right != NULL);
     fwrite(&hasLeft, sizeof(uint8_t), 1, file);
@@ -326,7 +326,7 @@ void writeNode(FILE* file, Node* node) {
     if (hasRight) writeNode(file, node->right);
 }
 
-// Function to save the Huffman tree to a binary file
+// Simpan huffman tree dalam binary file
 void saveHuffmanTree(Node* root, const char* filename) {
     FILE* file = fopen(filename, "wb");
     if (file == NULL) {
@@ -337,7 +337,7 @@ void saveHuffmanTree(Node* root, const char* filename) {
     fclose(file);
 }
 
-// Function to read a node from a binary file
+// Baca node dari binary file
 Node* readNode(FILE* file) {
     Node* node = (Node*)malloc(sizeof(Node));
 
@@ -361,7 +361,7 @@ Node* readNode(FILE* file) {
     return node;
 }
 
-// Function to load the Huffman tree from a binary file
+// Load huffman tree dari binary file
 Node* loadHuffmanTree(const char* filename) {
     FILE* file = fopen(filename, "rb");
     if (file == NULL) {
@@ -374,7 +374,7 @@ Node* loadHuffmanTree(const char* filename) {
 }
 
 // COMPRESS DECOMPRESS
-// Function to compress data using Huffman coding and save to a binary file
+// Fungsi untuk kompres data menggunakan huffman coding dan simpan dalam binary file
 void compressData(const char* input, Node* huffmanTree, const char* filename) {
     FILE* file = fopen(filename, "wb");
     if (file == NULL) {
@@ -397,7 +397,7 @@ void compressData(const char* input, Node* huffmanTree, const char* filename) {
     fclose(file);
 }
 
-// Function to decompress data using Huffman coding from a binary file
+// Decompress data
 void decompressData(const char* filename, Node* huffmanTree, char* output) {
     FILE* file = fopen(filename, "rb");
     if (file == NULL) {
