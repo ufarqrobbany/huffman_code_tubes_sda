@@ -11,6 +11,7 @@ Node* buatNode(char karakter, int frekuensi) {
     node->karakter = karakter;
     node->frekuensi = frekuensi;
     node->code = NULL;
+    node->code_length = 0;
     node->next = NULL;
     node->left = NULL;
     node->right = NULL;
@@ -337,7 +338,7 @@ void saveHuffmanTree(Node* root, const char* filename) {
     fclose(file);
 }
 
-// Baca node dari binary file
+// Baca node dari binary file (Pre-Oder)
 Node* readNode(FILE* file) {
     Node* node = (Node*)malloc(sizeof(Node));
 
