@@ -9,6 +9,7 @@ typedef struct Node {
     char karakter;
     int frekuensi;
     char* code;
+    int code_length;
     struct Node* next;
     struct Node* left;
     struct Node* right;
@@ -33,3 +34,13 @@ void cetakKodeHuffman(const Node* root);
 // modul gambar tree
 int isLeaf(struct Node* head);
 void generateDotFile(struct Node* root, FILE* file);
+
+// save load
+void writeNode(FILE* file, Node* node);
+void saveHuffmanTree(Node* root, const char* filename);
+Node* readNode(FILE* file);
+Node* loadHuffmanTree(const char* filename);
+
+// compress decompress
+void compressData(const char* input, Node* huffmanTree, const char* filename);
+void decompressData(const char* filename, Node* huffmanTree, char* output);

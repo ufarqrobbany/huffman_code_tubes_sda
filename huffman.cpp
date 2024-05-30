@@ -1,5 +1,6 @@
 #include "huffman.h"
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -304,4 +305,133 @@ void generateDotFile(struct Node* root, FILE* file) {
             generateDotFile(root->right, file);
         }
     }
+}
+
+// SAVE LOAD
+// Function to write a node to a binary file
+void writeNode(FILE* file, Node* node) {
+    if (node == NULL) return;
+
+    fwrite(&node->karakter, sizeof(char), 1, file);
+    fwrite(&node->frekuensi, sizeof(int), 1, file);
+    fwrite(&node->code_length, sizeof(int), 1, file);
+
+    // Write if the node has children
+    uint8_t hasLeft = (node->left != NULL);
+    uint8_t hasRight = (node->right != NULL);
+    fwrite(&hasLeft, sizeof(uint8_t), 1, file);
+    fwrite(&hasRight, sizeof(uint8_t), 1, file);
+
+    if (hasLeft) writeNode(file, node->left);
+    if (hasRight) writeNode(file, node->right);
+}
+
+// Function to save the Huffman tree to a binary file
+void saveHuffmanTree(Node* root, const char* filename) {
+    FILE* file = fopen(filename, "wb");
+    if (file == NULL) {
+        perror("Error opening file for writing");
+        return;
+    }
+    writeNode(file, root);
+    fclose(file);
+}
+
+// Function to read a node from a binary file
+Node* readNode(FILE* file) {
+    Node* node = (Node*)malloc(sizeof(Node));
+
+    if (fread(&node->karakter, sizeof(char), 1, file) != 1) {
+        free(node);
+        return NULL;
+    }
+    fread(&node->frekuensi, sizeof(int), 1, file);
+    fread(&node->code_length, sizeof(int), 1, file);
+
+    uint8_t hasLeft, hasRight;
+    fread(&hasLeft, sizeof(uint8_t), 1, file);
+    fread(&hasRight, sizeof(uint8_t), 1, file);
+
+    node->left = hasLeft ? readNode(file) : NULL;
+    node->right = hasRight ? readNode(file) : NULL;
+
+    node->code = NULL;
+    node->next = NULL;
+
+    return node;
+}
+
+// Function to load the Huffman tree from a binary file
+Node* loadHuffmanTree(const char* filename) {
+    FILE* file = fopen(filename, "rb");
+    if (file == NULL) {
+        perror("Error opening file for reading");
+        return NULL;
+    }
+    Node* root = readNode(file);
+    fclose(file);
+    return root;
+}
+
+// COMPRESS DECOMPRESS
+// Function to compress data using Huffman coding and save to a binary file
+void compressData(const char* input, Node* huffmanTree, const char* filename) {
+    FILE* file = fopen(filename, "wb");
+    if (file == NULL) {
+        perror("Error opening file for writing");
+        return;
+    }
+
+    int length = strlen(input);
+    fwrite(&length, sizeof(int), 1, file);
+
+    for (int i = 0; i < length; i++) {
+        const char* code = cariKodeHuffman(huffmanTree, input[i]);
+        if (code != NULL) {
+            uint8_t code_length = strlen(code);
+            fwrite(&code_length, sizeof(uint8_t), 1, file);
+            fwrite(code, sizeof(char), code_length, file);
+        }
+    }
+
+    fclose(file);
+}
+
+// Function to decompress data using Huffman coding from a binary file
+void decompressData(const char* filename, Node* huffmanTree, char* output) {
+    FILE* file = fopen(filename, "rb");
+    if (file == NULL) {
+        perror("Error opening file for reading");
+        return;
+    }
+
+    int length;
+    fread(&length, sizeof(int), 1, file);
+
+    Node* current = huffmanTree;
+    int output_index = 0;
+
+    for (int i = 0; i < length; i++) {
+        uint8_t code_length;
+        fread(&code_length, sizeof(uint8_t), 1, file);
+
+        for (int j = 0; j < code_length; j++) {
+            char bit;
+            fread(&bit, sizeof(char), 1, file);
+
+            if (bit == '0') {
+                current = current->left;
+            } else {
+                current = current->right;
+            }
+
+            if (isLeaf(current)) {
+                output[output_index++] = current->karakter;
+                current = huffmanTree;
+            }
+        }
+    }
+    output[output_index] = '\0';
+
+    fclose(file);
 }

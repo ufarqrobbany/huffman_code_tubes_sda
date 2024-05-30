@@ -73,6 +73,23 @@ int main() {
     ubahStringMenjadiHuffman(str, huffmanTree);
     printf("\n");
 
+    // ashdkjashdsd
+    // Save Huffman Tree to a file
+    saveHuffmanTree(huffmanTree, "huffman_tree.bin");
+
+    // Compress the input text and save to a file
+    compressData(str, huffmanTree, "compressed_data.bin");
+
+    // Load Huffman Tree from the file
+    Node* loadedTree = loadHuffmanTree("huffman_tree.bin");
+
+    // Decompress the data from the file
+    char decompressed[256];
+    decompressData("compressed_data.bin", loadedTree, decompressed);
+
+    // Print decompressed data
+    printf("Decompressed text: %s\n", decompressed);
+
     // Free memory
     Node* current = head;
     while (current != NULL) {
