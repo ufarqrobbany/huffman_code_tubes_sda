@@ -1,10 +1,11 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define TABLE_WIDTH 13
 
-// Struktur data
+// STRUKTUR DATA
 typedef struct Node {
     char karakter;
     int frekuensi;
@@ -15,32 +16,39 @@ typedef struct Node {
     struct Node* right;
 } Node;
 
-// modul
-Node* buatNode(char karakter, int frekuensi);
-void hitungFrekuensiKarakter(const char* str, Node** head);
-void tambahAtauPerbaruiNode(Node** head, char karakter);
-void urutkanFrekuensi(Node** head);
-Node* buatHuffmanTree(Node* head);
-void dapatkanKodeHuffman(Node* root, char* code, int depth);
-const char* cariKodeHuffman(const Node* root, char karakter);
-void ubahStringMenjadiHuffman(const char* str, const Node* huffmanTree);
+// HUFFMAN PROCESS
+Node* createNode(char karakter, int frekuensi);
+void updateNode(Node** head, char karakter);
+void calcCharFrequency(char* str, Node** head);
+void sortLinkedList(Node** head);
+Node* createBinaryTree(Node* head);
+void setCode(Node* root, char* code, int depth);
+char* getCode(Node* root, char karakter);
+char* convertToHuffmanCode(char* str, Node* huffmanTree);
 
-// modul menu (tampilan)
-void cetakJudul(char* text, int max_length);
-void cetakFrekuensi(const Node* head);
-void cetakHuffmanTree(Node* root, int depth);
-void cetakKodeHuffman(const Node* root);
-
-// modul gambar tree
-int isLeaf(struct Node* head);
+// HUFFMAN DISPLAY
+void printFrequency(const Node* head);
+void printBinaryTree(Node* root, int depth);
+void visualizeTree(Node* root);
 void generateDotFile(struct Node* root, FILE* file);
+void printCode(Node* root);
 
-// save load
-void writeNode(FILE* file, Node* node);
-void saveHuffmanTree(Node* root, const char* filename);
-Node* readNode(FILE* file);
-Node* loadHuffmanTree(const char* filename);
+// SAVE LOAD
+void saveTree(Node* root, FILE* file);
+Node* loadTree(FILE* file);
 
-// compress decompress
-void compressData(const char* input, Node* huffmanTree, const char* filename);
-void decompressData(const char* filename, Node* huffmanTree, char* output);
+// COMPRESS DECOMPRESS
+void compressProcess(char* str);
+void compressData(const char* input, Node* huffmanTree, const char* huffmanCode, const char* filename);
+void decompressData(const char* filename);
+
+// FREE MEMORY
+void freeTree(Node* root);
+// void decompress();
+// void decompressFile(const char* filename, Node* huffmanTree, char* output);
+
+// // save load
+// void writeNode(FILE* file, Node* node);
+// void saveHuffmanTree(Node* root, const char* filename);
+// Node* readNode(FILE* file);
+// Node* loadHuffmanTree(const char* filename);

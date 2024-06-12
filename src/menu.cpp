@@ -1,5 +1,8 @@
 #include "../include/menu.h"
 
+#include "../include/huffman.h"
+#include "../include/utils.h"
+
 void printTitle(char* text, int max_length) {
     int text_length = strlen(text);
 
@@ -37,4 +40,50 @@ void printCompressMenu() {
     printf("2. Input Text\n");
     printf("3. Kembali\n\n");
     printf("Pilih: ");
+}
+
+void compressMenu() {
+    int key;
+
+    do {
+        printCompressMenu();
+        scanf("%d", &key);
+        clearBuffer();
+
+        switch (key) {
+            case 1:
+                compressOpenFile();
+                break;
+            case 2:
+                compressInputText();
+            default:
+                break;
+        }
+    } while (key != 3);
+}
+
+void compressInputText() {
+    char str[100];
+
+    printf("Masukkan sebuah string: ");
+    fgets(str, sizeof(str), stdin);
+    str[strcspn(str, "\n")] = 0;
+
+    compressProcess(str);
+}
+
+void compressOpenFile() {
+    // decompressData("compressed_data.bin");
+    // printf("Tekan Enter untuk kembali...");
+    // getchar();
+    return;
+}
+
+void decompressMenu() {
+    char filename[256];
+    printf("Enter the path to the compressed file: ");
+    scanf("%255s", filename);
+    clearBuffer();
+
+    decompressData(filename);
 }

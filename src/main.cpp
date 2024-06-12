@@ -2,12 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "compress.h"
-#include "decompress.h"
-#include "huffman.h"
-#include "menu.h"
-#include "utils.h"
-#include "visualization.h"
+#include "../include/menu.h"
+#include "../include/utils.h"
 
 int main() {
     int key;
@@ -19,10 +15,10 @@ int main() {
 
         switch (key) {
             case 1:
-                compress();
+                compressMenu();
                 break;
             case 2:
-                decompress();
+                decompressMenu();
             default:
                 break;
         }
