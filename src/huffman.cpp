@@ -156,7 +156,7 @@ char* convertToHuffmanCode(char* str, Node* huffmanTree) {
     hasil[0] = '\0';  // Inisialisasi string kosong
 
     for (int i = 0; i < panjang; i++) {
-        const char* code = getCode(huffmanTree, str[i]);
+        char* code = getCode(huffmanTree, str[i]);
         if (code != NULL) {
             strcat(hasil, code);
         } else {
@@ -167,14 +167,36 @@ char* convertToHuffmanCode(char* str, Node* huffmanTree) {
     return hasil;
 }
 
+char* decodeHuffmanCode(Node* root, char* huffmanCode, int length) {
+    char* decodedData = (char*)malloc(length + 1);
+    int decodedIndex = 0;
+    Node* current = root;
+
+    for (int i = 0; huffmanCode[i] != '\0'; i++) {
+        if (huffmanCode[i] == '0') {
+            current = current->left;
+        } else {
+            current = current->right;
+        }
+
+        // If we reach a leaf node
+        if (current->left == NULL && current->right == NULL) {
+            decodedData[decodedIndex++] = current->karakter;
+            current = root;  // Go back to the root for the next character
+        }
+    }
+    decodedData[decodedIndex] = '\0';
+    return decodedData;
+}
+
 // ========================================================= HUFFMAN DISPLAY
 // Fungsi untuk mencetak hasil frekuensi dalam format tabel
-void printFrequency(const Node* head) {
+void printFrequency(Node* head) {
     // 1
     printf("%c", 201);
     for (int i = 0; i < 11; i++)
         printf("%c", 205);
-    const Node* current = head;
+    Node* current = head;
     while (current != NULL) {
         printf("%c", 203);
         for (int i = 0; i < 11; i++)
@@ -269,16 +291,42 @@ void printCode(Node* root) {
     printCode(root->right);
 }
 
-void visualizeTree(Node* root) {
-    FILE* file = fopen("tree_visualizations/huffman_tree.dot", "w");
-    fprintf(file, "digraph G {\n");
-    generateDotFile(root, file);
-    fprintf(file, "}\n");
-    fclose(file);
+void visualizeTree(Node* root, char* filename) {
+    char imageName[256];
+    strcpy(imageName, filename);
 
-    // Run 'dot -Tpng huffman_tree.dot -o huffman_tree.png' to generate the PNG image
-    system("dot -Tpng tree_visualizations/huffman_tree.dot -o tree_visualizations/huffman_tree.png");
-    printf("PNG image generated: tree_visualization/huffman_tree.png\n");
+    char* ext = strrchr(imageName, '.');
+    if (ext != NULL) {
+        *ext = '\0';  // Hilangkan ekstensi yang ada
+    }
+
+    char outputDotFilename[256];
+    snprintf(outputDotFilename, sizeof(outputDotFilename), "tree_visualizations/%s.dot", imageName);
+
+    FILE* dotFile = fopen(outputDotFilename, "w");
+    if (dotFile == NULL) {
+        perror("Error opening DOT file");
+        return;
+    }
+
+    fprintf(dotFile, "digraph G {\n");
+    generateDotFile(root, dotFile);
+    fprintf(dotFile, "}\n");
+    fclose(dotFile);
+
+    // Generate PNG image using Graphviz
+    char outputPngFilename[256];
+    snprintf(outputPngFilename, sizeof(outputPngFilename), "tree_visualizations/%s.png", imageName);
+
+    char command[512];
+    snprintf(command, sizeof(command), "dot -Tpng tree_visualizations/%s.dot -o %s", imageName, outputPngFilename);
+    int result = system(command);
+
+    if (result == 0) {
+        printf("PNG image generated: %s\n", outputPngFilename);
+    } else {
+        printf("Failed to generate PNG image.\n");
+    }
 }
 
 void generateDotFile(struct Node* root, FILE* file) {
@@ -328,7 +376,7 @@ Node* loadTree(FILE* file) {
 }
 
 // ========================================================= COMPRESS
-void compressProcess(char* str) {
+void compressProcess(char* str, char* outputFilename, char* originalExtension) {
     Node* head = NULL;
     printTitle("Tahap 1 - Hitung Frekuensi Karakter", 60);
     printf("Buat Node untuk Setiap Karakter, Hitung Frekuensi, Susun Linked List\n");
@@ -344,7 +392,7 @@ void compressProcess(char* str) {
     printf("Buat Binary Tree dari Linked List yang telah diurutkan, buat visualisasi tree\n");
     Node* huffmanTree = createBinaryTree(head);
     printBinaryTree(huffmanTree, 0);
-    visualizeTree(huffmanTree);
+    visualizeTree(huffmanTree, outputFilename);
 
     printTitle("Tahap 4 - Penetapan Kode Huffman untuk Setiap Karakter", 60);
     printf("Traversal Binary Tree, set kode huffman untuk setiap karakter pada Node\n");
@@ -358,8 +406,8 @@ void compressProcess(char* str) {
 
     printTitle("Tahap 6 - Simpan Hasil Kompress", 60);
     printf("Simpan data hasil kompres beserta tree nya\n");
-    printf("compressed_files/compressed_data.bin\n\n");
-    compressData(str, huffmanTree, huffmanCode, "compressed_data.bin");
+    printf("File compressed and saved as: %s\n", outputFilename);
+    compressData(str, huffmanTree, huffmanCode, outputFilename, originalExtension);
 
     printf("Tekan Enter untuk kembali...");
     getchar();
@@ -374,7 +422,7 @@ void compressProcess(char* str) {
     }
 }
 
-void compressData(const char* input, Node* huffmanTree, const char* huffmanCode, const char* filename) {
+void compressData(char* input, Node* huffmanTree, char* huffmanCode, char* filename, char* originalExtension) {
     char filepath[256];
     snprintf(filepath, sizeof(filepath), "compressed_files/%s", filename);
 
@@ -382,12 +430,19 @@ void compressData(const char* input, Node* huffmanTree, const char* huffmanCode,
 
     if (file == NULL) {
         perror("Error opening file for writing");
+        printf("Tekan Enter untuk kembali...");
+        getchar();
         return;
     }
 
     // Save input length
     int length = strlen(input);
     fwrite(&length, sizeof(int), 1, file);
+
+    // Save original extension length and extension
+    uint8_t extLength = strlen(originalExtension);
+    fwrite(&extLength, sizeof(uint8_t), 1, file);
+    fwrite(originalExtension, sizeof(char), extLength, file);
 
     // Save Huffman Tree
     saveTree(huffmanTree, file);
@@ -403,12 +458,11 @@ void compressData(const char* input, Node* huffmanTree, const char* huffmanCode,
 }
 
 // ========================================================= DECOMPRESS
-void decompressData(const char* filename) {
+void decompressData(char* filename) {
     FILE* file = fopen(filename, "rb");
     if (file == NULL) {
         perror("Error opening file for reading");
-
-        printf("\nTekan Enter untuk kembali...");
+        printf("Tekan Enter untuk kembali...");
         getchar();
         return;
     }
@@ -416,6 +470,13 @@ void decompressData(const char* filename) {
     // Read input length
     int length;
     fread(&length, sizeof(int), 1, file);
+
+    // Read original extension length and extension
+    uint8_t extLength;
+    fread(&extLength, sizeof(uint8_t), 1, file);
+    char originalExtension[extLength + 1];
+    fread(originalExtension, sizeof(char), extLength, file);
+    originalExtension[extLength] = '\0';
 
     // Load Huffman Tree
     Node* huffmanTree = loadTree(file);
@@ -429,30 +490,46 @@ void decompressData(const char* filename) {
     fread(huffmanCode, sizeof(char), huffmanCodeLength, file);
     huffmanCode[huffmanCodeLength] = '\0';
 
-    // Decode data
-    char* decoded = (char*)malloc(length + 1);
-    Node* current = huffmanTree;
-    int index = 0;
+    fclose(file);
 
-    for (int i = 0; i < huffmanCodeLength; i++) {
-        current = (huffmanCode[i] == '0') ? current->left : current->right;
-        if (current->left == NULL && current->right == NULL) {
-            decoded[index++] = current->karakter;
-            current = huffmanTree;
-        }
+    // Decode the data
+    char* decodedData = decodeHuffmanCode(huffmanTree, huffmanCode, length);
+
+    // Determine output filename
+    char* filenameWithoutPath = strrchr(filename, '/');
+    if (filenameWithoutPath == NULL) {
+        filenameWithoutPath = filename;
+    } else {
+        filenameWithoutPath++;  // Untuk menghindari tanda '/'
     }
 
-    decoded[length] = '\0';
-    printf("Decoded string: %s\n", decoded);
+    char* ext = strrchr(filenameWithoutPath, '.');
+    if (ext != NULL) {
+        *ext = '\0';  // Hilangkan ekstensi yang ada
+    }
 
+    char outputFilename[256];
+    snprintf(outputFilename, sizeof(outputFilename), "decompressed_files/%s.%s", filenameWithoutPath, originalExtension);
+
+    // Save decoded data to file
+    FILE* outputFile = fopen(outputFilename, "wb");
+    if (outputFile == NULL) {
+        perror("Error opening file for writing");
+        free(huffmanCode);
+        free(decodedData);
+        freeTree(huffmanTree);
+        return;
+    }
+    fwrite(decodedData, sizeof(char), length, outputFile);
+    fclose(outputFile);
+
+    printf("File decompressed and saved as: %s\n", outputFilename);
     printf("Tekan Enter untuk kembali...");
     getchar();
 
-    free(decoded);
+    // Bebaskan memori
     free(huffmanCode);
-    fclose(file);
-
-    // Bebaskan memori tree
+    free(decodedData);
     freeTree(huffmanTree);
 }
 

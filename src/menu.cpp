@@ -64,19 +64,48 @@ void compressMenu() {
 
 void compressInputText() {
     char str[100];
+    char outputFilename[256];
 
     printf("Masukkan sebuah string: ");
     fgets(str, sizeof(str), stdin);
     str[strcspn(str, "\n")] = 0;
 
-    compressProcess(str);
+    printf("Masukkan nama file hasil kompres (tanpa extensi): ");
+    scanf("%255s", outputFilename);
+    clearBuffer();
+    strcat(outputFilename, ".bin");
+
+    compressProcess(str, outputFilename, "txt");
 }
 
 void compressOpenFile() {
-    // decompressData("compressed_data.bin");
-    // printf("Tekan Enter untuk kembali...");
-    // getchar();
-    return;
+    char inputFilename[256];
+    char outputFilename[256];
+
+    printf("Masukkan path file yang akan dikompres: ");
+    scanf("%255s", inputFilename);
+    clearBuffer();
+
+    // Extract original file extension
+    char* ext = strrchr(inputFilename, '.');
+    if (ext == NULL) {
+        printf("Invalid file name. No extension found.\n");
+        return;
+    }
+    ext++;  // Skip the dot
+
+    printf("Masukkan nama file hasil kompres (tanpa extensi): ");
+    scanf("%255s", outputFilename);
+    clearBuffer();
+    strcat(outputFilename, ".bin");
+
+    char* content = readFileContent(inputFilename);
+    if (content == NULL) {
+        printf("Failed to read the file content.\n");
+        return;
+    }
+
+    compressProcess(content, outputFilename, ext);
 }
 
 void decompressMenu() {

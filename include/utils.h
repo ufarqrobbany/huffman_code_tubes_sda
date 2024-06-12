@@ -3,3 +3,5 @@
 #include <string.h>
 
 void clearBuffer();
+int fileExists(const char* filename);
+char* readFileContent(const char* filename);
