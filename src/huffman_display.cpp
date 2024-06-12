@@ -1,3 +1,5 @@
+#include "../include/huffman_display.h"
+
 // Fungsi untuk mencetak hasil frekuensi dalam format tabel
 void printFrequency(const Node* head) {
     // 1
@@ -85,4 +87,16 @@ void printBinaryTree(Node* root, int depth) {
         cetakHuffmanTree(root->left, depth + 1);
         cetakHuffmanTree(root->right, depth + 1);
     }
+}
+
+// Fungsi untuk mencetak kode Huffman dari setiap karakter
+void printCode(const Node* root) {
+    if (root == NULL) return;
+
+    if (root->left == NULL && root->right == NULL) {
+        printf("Karakter: '%c', Kode: %s\n", root->karakter, root->code);
+    }
+
+    cetakKodeHuffman(root->left);
+    cetakKodeHuffman(root->right);
 }

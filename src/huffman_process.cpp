@@ -1,9 +1,9 @@
-#include "huffman.h"
-
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "huffman.h"
 
 Node* createNode(char karakter, int frekuensi) {
     Node* node = (Node*)malloc(sizeof(Node));
@@ -143,19 +143,28 @@ const char* getCode(const Node* root, char karakter) {
     return code;
 }
 
-// Fungsi untuk mengubah string menjadi kode Huffman
-void convertToHuffmanCode(const char* str, const Node* huffmanTree) {
+// Fungsi untuk mengubah string menjadi kode Huffman dan mengembalikan hasilnya
+char* convertToHuffmanCode(const char* str, const Node* huffmanTree) {
+    // Alokasi buffer untuk hasil konversi
     int panjang = strlen(str);
-    printf("String dalam kode Huffman: ");
+    // Asumsi panjang maksimum kode Huffman per karakter adalah 16 bit
+    char* hasil = (char*)malloc(panjang * 16 * sizeof(char));
+    if (hasil == NULL) {
+        printf("Alokasi memori gagal\n");
+        return NULL;
+    }
+    hasil[0] = '\0';  // Inisialisasi string kosong
+
     for (int i = 0; i < panjang; i++) {
         const char* code = cariKodeHuffman(huffmanTree, str[i]);
         if (code != NULL) {
-            printf("%s", code);
+            strcat(hasil, code);
         } else {
-            printf("?");
+            strcat(hasil, "?");
         }
     }
-    printf("\n");
+
+    return hasil;
 }
 
 // SAVE LOAD
@@ -247,5 +256,3 @@ void compressData(const char* input, Node* huffmanTree, const char* filename) {
 
     fclose(file);
 }
-
-// Decompress data
