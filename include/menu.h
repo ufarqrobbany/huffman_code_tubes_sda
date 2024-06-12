@@ -9,3 +9,7 @@ void compressMenu();
 void compressOpenFile();
 void compressInputText();
 void decompressMenu();
+
+//ui
+void tittleScreen();
+void treePattern();

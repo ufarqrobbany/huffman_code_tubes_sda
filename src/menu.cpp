@@ -26,6 +26,7 @@ void printTitle(char* text, int max_length) {
 
 void printMainMenu() {
     system("cls");
+    tittleScreen();
     printTitle("HUFFMAN CODE", 60);
     printf("1. Kompres\n");
     printf("2. Dekompres\n");
@@ -35,6 +36,7 @@ void printMainMenu() {
 
 void printCompressMenu() {
     system("cls");
+    tittleScreen();
     printTitle("HUFFMAN CODE - COMPRESS", 60);
     printf("1. Pilih File\n");
     printf("2. Input Text\n");
@@ -115,4 +117,36 @@ void decompressMenu() {
     clearBuffer();
 
     decompressData(filename);
+}
+
+void tittleScreen() {
+    printf("\033[1;33m"); // Set text color to yellow
+    printf(" __    __              _   ___ _       _               \n");
+    printf("/ / /\\ \\ \\___  _ __ __| | / __(_)_ __ | |__   ___ _ __ \n");
+    printf("\\ \\/  \\/ / _ \\| '__/ _` |/ /  | | '_ \\| '_ \\ / _ \\ '__|\n");
+    printf(" \\  /\\  / (_) | | | (_| / /___| | |_) | | | |  __/ |   \n");
+    printf("  \\/  \\/ \\___/|_|  \\__,_\\____/|_| .__/|_| |_|\\___|_|   \n");
+    printf("                                |_|                    \n");
+    printf("\033[0m"); // Reset text color
+    printf("\033[1;34m"); // Set text color to blue
+    printf(" oleh Nieto Salim Maula & Umar Faruq Robbany");
+    printf("\033[0m\n"); // Reset text color
+}
+
+void treePattern() {
+    printf("             :--....          \n");
+    printf("      :----=========:         \n");
+    printf("   :-===+==++=+==+==-:-:-=-   \n");
+    printf("   :===+================+==-  \n");
+    printf(" .-===++===============++==-: \n");
+    printf(" .=+========+=++=========++=-:\n");
+    printf(" -+++++++++++*++++++++=+**+=- \n");
+    printf(":=++***#**#***###******###+-  \n");
+    printf(" ...-=+*####+#%##%#***++-:    \n");
+    printf("     .....-+####+**:. .       \n");
+    printf("            -###+*.           \n");
+    printf("            :###=             \n");
+    printf("            -#**:             \n");
+    printf("            *%#*-             \n");
+    printf("          .#%##**:            \n");
 }
