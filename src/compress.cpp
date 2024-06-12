@@ -1,19 +1,36 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "../include/compress.h"
 
-#include "huffman.h"
+#include "../include/huffman.h"
+#include "../include/menu.h"
+#include "../include/utils.h"
 
-void kompres() {
-    system("cls");
+void compressInputText() {
     char str[100];
     Node* head = NULL;
 
     printf("Masukkan sebuah string: ");
     fgets(str, sizeof(str), stdin);
-
-    // Menghilangkan karakter newline jika ada
     str[strcspn(str, "\n")] = 0;
+}
+
+void compress() {
+    int key;
+
+    do {
+        printCompressMenu();
+        scanf("%d", &key);
+        clearBuffer();
+
+        switch (key) {
+            case 1:
+                compressOpenFile();
+                break;
+            case 2:
+                compressInputText();
+            default:
+                break;
+        }
+    } while (key != 3);
 
     printf("\n");
     cetakJudul("Tahap 1 - Pengumpulan Frekuensi Karakter", 60);
@@ -54,7 +71,8 @@ void kompres() {
     fclose(file);
 
     printf("DOT file generated: huffman_tree.dot\n");
-    printf("Run 'dot -Tpng huffman_tree.dot -o huffman_tree.png' to generate the PNG image.\n");
+    // Run 'dot -Tpng huffman_tree.dot -o huffman_tree.png' to generate the PNG image
+    system("dot -Tpng huffman_tree.dot -o huffman_tree.png");
 
     cetakJudul("Tahap 4 - Penetapan Kode Huffman", 60);
 
@@ -93,55 +111,4 @@ void kompres() {
 
     printf("Tekan Enter untuk kembali...");
     getchar();
-}
-
-void dekompres() {
-    system("cls");
-
-    // Baca Huffman Tree dari file
-    Node* loadedTree = loadHuffmanTree("huffman_tree.bin");
-
-    // Dekompres
-    char decompressed[256];
-    decompressData("compressed_data.bin", loadedTree, decompressed);
-
-    // Print hasil dekompres
-    printf("Decompressed text: %s\n", decompressed);
-
-    printf("\nTekan Enter untuk kembali...");
-    getchar();
-}
-
-// Fungsi untuk membersihkan buffer input
-void bersihkanBuffer() {
-    int c;
-    while ((c = getchar()) != '\n' && c != EOF);
-}
-
-// Fungsi utama
-int main() {
-    int key;
-
-    do {
-        system("cls");
-        cetakJudul("HUFFMAN CODE", 60);
-        printf("1. Kompres\n");
-        printf("2. Dekompres\n");
-        printf("3. Keluar\n\n");
-        printf("Pilih: ");
-        scanf("%d", &key);
-        bersihkanBuffer();
-
-        switch (key) {
-            case 1:
-                kompres();
-                break;
-            case 2:
-                dekompres();
-            default:
-                break;
-        }
-    } while (key != 3);
-
-    return 0;
 }
