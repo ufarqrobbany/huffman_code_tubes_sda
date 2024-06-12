@@ -10,7 +10,6 @@ typedef struct Node {
     char karakter;
     int frekuensi;
     char* code;
-    int code_length;
     struct Node* next;
     struct Node* left;
     struct Node* right;

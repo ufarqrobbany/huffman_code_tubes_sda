@@ -10,7 +10,6 @@ Node* createNode(char karakter, int frekuensi) {
     node->karakter = karakter;
     node->frekuensi = frekuensi;
     node->code = NULL;
-    node->code_length = 0;
     node->next = NULL;
     node->left = NULL;
     node->right = NULL;
@@ -88,6 +87,8 @@ void sortLinkedList(Node** head) {
 
 // Fungsi untuk membuat pohon Huffman
 Node* createBinaryTree(Node* head) {
+    printf("\n");
+    printf("Tracing Proses:\n");
     while (head != NULL && head->next != NULL) {
         // traversal linked list
         Node* left = head;
@@ -101,8 +102,24 @@ Node* createBinaryTree(Node* head) {
         newNode->next = head;
         head = newNode;
 
+        // Cetak informasi node
+        printf("Merged (%c, %d) and (%c, %d) into (%c, %d)\n",
+               left->karakter, left->frekuensi,
+               right->karakter, right->frekuensi,
+               newNode->karakter, newNode->frekuensi);
+
         sortLinkedList(&head);
+
+        // Cetak list setelah pengurutan
+        printf("List after sorting: ");
+        Node* current = head;
+        while (current != nullptr) {
+            printf("(%c, %d) ", current->karakter, current->frekuensi);
+            current = current->next;
+        }
+        printf("\n");
     }
+    printf("\nHasil Akhir Tree\n");
     return head;
 }
 
